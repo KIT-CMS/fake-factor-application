@@ -192,6 +192,6 @@ def main(args):
 
 if __name__ == "__main__":
     args = parse_arguments()
-    setup_logging("{}_calculate_fake_factors.log".format(args.era),
+    setup_logging("{}_calculate_fake_factor_friends.log".format(args.era),
                   logging.INFO)
     main(args)

@@ -284,7 +284,7 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
             output_file.Close()
 
 
-def load_fractions(configpath, configkey, use_fractions_from_worspace, workspace, fractions, era):
+def load_fractions(configpath, configkey, use_fractions_from_worspace, workspace, fractionfiles, era):
     if use_fractions_from_worspace:
         logger.info("Loading workspace from %s"%workspace)
         f = ROOT.TFile(workspace)
@@ -292,4 +292,4 @@ def load_fractions(configpath, configkey, use_fractions_from_worspace, workspace
         f.Close()
         return fractions
     else:
-        return determine_fractions(configpath, configkey, fractions, era)
+        return determine_fractions(configpath, configkey, fractionfiles, era)
