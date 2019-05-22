@@ -203,7 +203,7 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
                 if eventrange!=None:
                     if evt_i<eventrange[0]:
                         continue
-                    elif evt_i>eventrange[1]:
+                    elif evt_i>eventrange[1] and eventrange[1]>=0: #latter condition allows to set negative upper limit in order to have it ignored
                         break
                 for x in suffix[channel]:
                     inputs = []
