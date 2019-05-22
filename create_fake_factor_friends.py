@@ -136,11 +136,7 @@ def main(args):
                 or "W1Jets" in entry
                 or "W2Jets" in entry
                 or "W3Jets" in entry
-                or "W4Jets" in entry
-                or "DYJetsToLLM10to50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_ext1-v1" in entry
-                or "DYJetsToLLM10to50_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_madgraph-pythia8_v1" in entry
-                or "ZZTo4L_RunIIFall17MiniAODv2_PU2017newpmx_13TeV_MINIAOD_powheg-pythia8_v1" in entry
-                or "TTToSemiLeptonic_RunIIFall17MiniAODv2_PU2017_13TeV_MINIAOD_powheg-pythia8_v2" in entry): #no et folder in this file
+                or "W4Jets" in entry:
             path = os.path.join(entry, "%s.root" % entry)
 
             #check whether expected files exist
