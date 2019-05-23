@@ -257,6 +257,7 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
                     output_buffer["nom_%i" % x][0] = ff.value(
                         len(inputs), array('d', inputs))
                     if not (output_buffer["nom_%i" % x][0] >= 0.0 and output_buffer["nom_%i" % x][0] <= 999.0):
+                        logger.info("Got invalid nominal weight %s for inputs [%s]"%(str(output_buffer["nom_%i" % x][0]), ', '.join(str(e) for e in inputs)))
                         output_buffer["nom_%i" % x][0] = 0.0
                     for syst in unc_shifts[channel]:
                         for shift in ["up", "down"]:
@@ -264,10 +265,7 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
                                 len(inputs), array('d', inputs), "%s_%s" % (syst,
                                                                             shift))
                             if not (output_buffer["%s_%s_%i" % (syst, shift, x)][0] >= 0.0 and output_buffer["%s_%s_%i" % (syst, shift, x)][0] <= 999.0):
-                                #output_buffer["%s_%s_%i" % (syst, shift, x)][0] = 0.0
-                                print syst + shift
-                                print output_buffer["%s_%s_%i" % (syst, shift, x)][0]
-                                print inputs
+                                logger.info("Got invalid weight %s for syst shift %s and inputs [%s]"%(str(output_buffer["%s_%s_%i" % (syst, shift, x)][0]), syst, ', '.join(str(e) for e in inputs)))
                                 output_buffer["%s_%s_%i" % (syst, shift, x)][0] = 0.0
                 output_tree.Fill()
 
