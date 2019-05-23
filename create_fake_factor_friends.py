@@ -136,7 +136,7 @@ def main(args):
                 or "W1Jets" in entry
                 or "W2Jets" in entry
                 or "W3Jets" in entry
-                or "W4Jets" in entry:
+                or "W4Jets" in entry):
             path = os.path.join(entry, "%s.root" % entry)
 
             #check whether expected files exist
