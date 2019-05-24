@@ -194,9 +194,9 @@ def main(args):
         }
 
     # Variables and categories
-    config = yaml.load(open("fake-factors/config.yaml"))
+    config = yaml.load(open("fake-factor-application/config.yaml"))
     if not args.config in config.keys():
-        logger.critical("Requested config key %s not available in fake-factors/config.yaml!" % args.config)
+        logger.critical("Requested config key %s not available in fake-factor-application/config.yaml!" % args.config)
         raise Exception
     config = config[args.config]
 
