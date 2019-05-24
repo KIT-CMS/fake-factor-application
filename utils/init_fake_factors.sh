@@ -21,3 +21,6 @@ mkdir data_2017
 git clone -b 2017 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data_2017
 mkdir data_2018
 git clone -b 2018 ssh://git@gitlab.cern.ch:7999/cms-htt/Jet2TauFakesFiles.git data_2018
+
+# Get fractions workspaces
+./fake-factor-application/utils/get_fractions_workspaces.sh
