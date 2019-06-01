@@ -98,13 +98,18 @@ def determine_fractions(configpath, configkey, fractionsfile, era):
     return fractions
 
 
-def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fakefactordirectories, fractions, use_fractions_from_worspace, configpath, expression, era, pipeline_selection=None, treename="ntuple", eventrange=None):
+def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fakefactordirectories, fractions, use_fractions_from_worspace, configpath, expression, era, pipeline_selection=None, treename="ntuple", eventrange=None, rootfilemode="update"):
     
     config = yaml.load(open(configpath))
     if not "categories" in config.keys():
         logger.critical("Config file %s has to contain key 'categories'!" % configpath)
         raise Exception
     categories = config["categories"]
+
+    rootfilemode = rootfilemode.lower()
+    if rootfilemode not in ["update", "recreate"]:
+        logger.critical("Mode %s not appropriate for create of ROOT file. Please choose from 'update' and 'recreate'"%rootfilemode)
+        raise Exception
 
     unc_shifts = {  #documented in https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes
         "et": [
@@ -174,7 +179,7 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
                 "...initialize %s" % outputfile)
             if not os.path.exists(os.path.dirname(outputfile)):
                 os.mkdir(os.path.dirname(outputfile))
-            output_file = ROOT.TFile(outputfile, "UPDATE")
+            output_file = ROOT.TFile(outputfile, rootfilemode)
             output_root_dir = output_file.mkdir("%s_%s" %(channel, pipeline))
             output_root_dir.cd()
             output_tree = ROOT.TTree(treename, treename)
