@@ -71,7 +71,7 @@ def interpolateHistos_qqh(h1_old, h2_old):
 
 def main(args):
     file_ = ROOT.TFile(args.input, "UPDATE")
-    for key in file_.GetListOfKeys():
+    for key in [k for k in file_.GetListOfKeys() if not "output_tree" == k.GetName()]:
         # Parse name
         name = key.GetName()
 
