@@ -143,7 +143,8 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
     if not "Run%s"%era in filename:
         pipelines = ["nominal", "tauEsOneProngUp", "tauEsOneProngDown",
                      "tauEsOneProngOnePiZeroUp", "tauEsOneProngOnePiZeroDown",
-                     "tauEsThreeProngUp", "tauEsThreeProngDown"]
+                     "tauEsThreeProngUp", "tauEsThreeProngDown",
+                     "tauEsThreeProngOnePiZeroUp", "tauEsThreeProngOnePiZeroDown"]
     for channel in channels:
         for pipeline in pipelines:
             if pipeline_selection and pipeline_selection!="%s_%s"%(channel, pipeline):
