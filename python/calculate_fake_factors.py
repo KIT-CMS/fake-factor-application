@@ -253,8 +253,8 @@ def apply_fake_factors(datafile, friendfilelists, outputfile, category_mode, fak
                         ]
                     else:
                         inputs = [
-                            event.pt_2, event.decayMode_2, event.njets, event.m_vis,
-                            event.mt_1, event.iso_1,
+                            event.pt_2, event.decayMode_2, event.njets, event.m_vis, event.pt_1,
+                            event.mt_1, event.iso_1, 
                             qcd_fraction,
                             w_fraction,
                             tt_fraction
