@@ -119,6 +119,7 @@ def apply_fake_factors(
         datafile, friendfilelists, outputfile, category_mode, fakefactordirectories,
         fractions, use_fractions_from_worspace, configpath, expression, era,
         pipeline_selection=None, treename="ntuple", eventrange=None, rootfilemode="update",
+        use_mva_tauid=False,
 ):
 
     config = yaml.load(open(configpath))
@@ -288,11 +289,21 @@ def apply_fake_factors(
                     else:
                         inputs = [
                             event.pt_2, event.decayMode_2, event.njets, event.m_vis, event.pt_1,
-                            event.mt_1, event.iso_1, 
+                            event.mt_1, event.iso_1,
                             qcd_fraction,
                             w_fraction,
                             tt_fraction
                         ]
+                        if use_mva_tauid:
+                            inputs = [
+                                event.pt_2, event.decayMode_2,
+                                event.njets, event.m_vis,
+                                event.mt_1, event.iso_1,
+                                qcd_fraction,
+                                w_fraction,
+                                tt_fraction
+                            ]
+
                     output_buffer["nom_%i" % x][0] = ff.value(len(inputs), array('d', inputs))
                     if not (output_buffer["nom_%i" % x][0] >= 0.0 and output_buffer["nom_%i" % x][0] <= 999.0):
                         logger.info("Got invalid nominal weight %s for inputs [%s]" % (str(output_buffer["nom_%i" % x][0]), ', '.join(str(e) for e in inputs)))
