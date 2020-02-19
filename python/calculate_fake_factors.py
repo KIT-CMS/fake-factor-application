@@ -133,6 +133,9 @@ def apply_fake_factors(
         logger.critical("Mode %s not appropriate for create of ROOT file. Please choose from 'update' and 'recreate'"%rootfilemode)
         raise Exception
 
+    if pipeline_selection is not None:
+        assert isinstance(pipeline_selection, six.string_types), "Invalid pipeline_selection"
+
     # documented in https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes
     unc_shifts = {
         "et": [
@@ -187,7 +190,7 @@ def apply_fake_factors(
                 input_tree.AddFriend(input_friend)
 
             # Check availability of required input variables
-            varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1"]
+            varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi"]
             if category_mode != "inclusive":
                 varlist.append("%s_max_index" % channel)
 
@@ -263,7 +266,7 @@ def apply_fake_factors(
                         if expression == "njets_mvis":
                             varvalue = 300.0 * min(event.njets, 2.0) + min(290.0, event.m_vis)
                         elif expression in config['fraction_binning'].keys():
-                            varvalue = eval(config['fraction_binning'][expression][channel]['expression'], {'min': min, 'max': max, 'm_vis': event.m_vis, 'njets': event.njets})
+                            varvalue = eval(config['fraction_binning'][expression][channel]['expression'], {'min': min, 'max': max, 'm_vis': event.m_vis, 'njets': event.njets, 'mt_1_puppi': event.mt_1_puppi})
                         else:
                             varvalue = getattr(event, expression)
                         cat_fractions = fractions[channel][categories[channel][cat_index]]
@@ -272,6 +275,9 @@ def apply_fake_factors(
                         w_fraction = cat_fractions["W"].GetBinContent(bin_index)
                         tt_fraction = cat_fractions["TT"].GetBinContent(bin_index)
                     fraction_sum = qcd_fraction + w_fraction + tt_fraction
+                    if fraction_sum == 0:
+                        logger.critical("Division by zero -> forcing fraction_sum to 1")
+                        fraction_sum = 1
 
                     qcd_fraction /= fraction_sum
                     w_fraction /= fraction_sum
@@ -329,6 +335,10 @@ def apply_fake_factors(
             input_file.Close()
             output_file.Close()
             print 'done'
+            return 0
+
+    print 'done (no matching pipelines found)'
+    return 1
 
 
 def load_fractions(configpath, configkey, use_fractions_from_worspace, workspace, fractionfiles, era):
