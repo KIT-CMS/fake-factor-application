@@ -8,7 +8,7 @@ import numpy
 import copy
 from array import array
 import six
-
+from numpy import sqrt, power
 import logging
 logger = logging.getLogger()
 
@@ -117,7 +117,7 @@ def determine_fractions(config, configkey, fractionsfile, era, emb=True, tag='sm
 
 def apply_fake_factors(
         datafile, friendfilelists, outputfile, category_mode, fakefactordirectories,
-        fractions, use_fractions_from_worspace, configpath, expression, era,
+        fractions, use_fractions_from_workspace, configpath, expression, era,
         pipeline_selection=None, treename="ntuple", eventrange=None, rootfilemode="update",
         use_mva_tauid=False,
 ):
@@ -141,16 +141,42 @@ def apply_fake_factors(
         "et": [
             "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
             "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat",
-            "ff_tt_syst", "ff_tt_dm0_njet0_stat", "ff_tt_dm0_njet1_stat"
+            # "ff_tt_syst", "ff_tt_dm0_njet0_stat", "ff_tt_dm0_njet1_stat",
+            "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf",
+            "ff_frac_w",
+            "ff_w_lepPt",
+            "ff_w_mc",
+            "ff_w_mt",
+            "ff_qcd_mvis",
+            "ff_qcd_muiso",
+            "ff_qcd_mc",
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
+            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat",
+            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat", 
         ],
         "mt": [
             "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
             "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat",
-            "ff_tt_syst", "ff_tt_dm0_njet0_stat", "ff_tt_dm0_njet1_stat"
+            # "ff_tt_syst", "ff_tt_dm0_njet0_stat", "ff_tt_dm0_njet1_stat",
+            "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf",
+            "ff_frac_w",
+            "ff_w_lepPt",
+            "ff_w_mc",
+            "ff_w_mt",
+            "ff_qcd_mvis",
+            "ff_qcd_muiso",
+            "ff_qcd_mc",
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
+            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat",
+            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat", 
         ],
         "tt": [
             "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
-            "ff_w_syst", "ff_tt_syst", "ff_w_frac_syst", "ff_tt_frac_syst"
+            "ff_w_syst", "ff_tt_syst", "ff_w_frac_syst", "ff_tt_frac_syst",
+            "ff_qcd_mvis",
+            "ff_qcd_tau2_pt",
+            "ff_qcd_mc",
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
         ]
     }
 
@@ -193,7 +219,6 @@ def apply_fake_factors(
             varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi"]
             if category_mode != "inclusive":
                 varlist.append("%s_max_index" % channel)
-
             if expression not in config['fraction_binning'].keys():
                 varlist.append(expression)
 
@@ -253,7 +278,7 @@ def apply_fake_factors(
                     qcd_fraction = 0.0
                     w_fraction = 0.0
                     tt_fraction = 0.0
-                    if use_fractions_from_worspace:
+                    if use_fractions_from_workspace:
                         fractions.var("cat").setVal(-1 if category_mode == "inclusive" else getattr(event, "%s_max_index" % channel))
                         fractions.var("m_vis").setVal(event.m_vis)
                         fractions.var("njets").setVal(event.njets)
@@ -265,6 +290,10 @@ def apply_fake_factors(
                         varvalue = 0.0
                         if expression == "njets_mvis":
                             varvalue = 300.0 * min(event.njets, 2.0) + min(290.0, event.m_vis)
+                        elif expression == "njets2bins_mt_1_puppi":
+                            varvalue = 180.0 * min(event.njets, 1.0) + min(160.0, event.mt_1_puppi)
+                        elif expression == "njets2bins_m_vis":
+                            varvalue = 250.0 * min(event.njets, 1.0) + min(240.0, event.m_vis)
                         elif expression in config['fraction_binning'].keys():
                             varvalue = eval(config['fraction_binning'][expression][channel]['expression'], {'min': min, 'max': max, 'm_vis': event.m_vis, 'njets': event.njets, 'mt_1_puppi': event.mt_1_puppi})
                         else:
@@ -273,15 +302,26 @@ def apply_fake_factors(
                         bin_index = cat_fractions["data"].GetXaxis().FindBin(varvalue)
                         qcd_fraction = cat_fractions["QCD"].GetBinContent(bin_index)
                         w_fraction = cat_fractions["W"].GetBinContent(bin_index)
+                        if channel in ["mt","et"]:
+                            w_fraction_error = sqrt(power(cat_fractions["W"].GetBinError(bin_index)/cat_fractions["W"].GetBinContent(bin_index),2)+power(0.05,2))
                         tt_fraction = cat_fractions["TT"].GetBinContent(bin_index)
+                    
                     fraction_sum = qcd_fraction + w_fraction + tt_fraction
                     if fraction_sum == 0:
                         logger.critical("Division by zero -> forcing fraction_sum to 1")
                         fraction_sum = 1
-
+                    if not use_fractions_from_workspace and channel in ["mt","et"]:
+                        w_fraction_w_up = (1.+w_fraction_error)*w_fraction
+                        w_fraction_w_down = (1.-w_fraction_error)*w_fraction
+                        w_fraction_w_up /= fraction_sum
+                        w_fraction_w_down /= fraction_sum
                     qcd_fraction /= fraction_sum
                     w_fraction /= fraction_sum
                     tt_fraction /= fraction_sum
+
+                    if not use_fractions_from_workspace and channel in ["mt","et"]:
+                        qcd_fraction_w_up = 1 - tt_fraction - w_fraction_w_up
+                        qcd_fraction_w_down = 1 - tt_fraction - w_fraction_w_down
 
                     if channel == "tt":
                         inputs = [
@@ -298,7 +338,8 @@ def apply_fake_factors(
                             event.mt_1, event.iso_1,
                             qcd_fraction,
                             w_fraction,
-                            tt_fraction
+                            tt_fraction,
+                            w_fraction_w_up, w_fraction_w_down, qcd_fraction_w_up, qcd_fraction_w_down
                         ]
                         if use_mva_tauid:
                             inputs = [
@@ -341,8 +382,8 @@ def apply_fake_factors(
     return 1
 
 
-def load_fractions(configpath, configkey, use_fractions_from_worspace, workspace, fractionfiles, era):
-    if use_fractions_from_worspace:
+def load_fractions(configpath, configkey, use_fractions_from_workspace, workspace, fractionfiles, era):
+    if use_fractions_from_workspace:
         logger.info("Loading workspace from %s" % workspace)
         f = ROOT.TFile(workspace)
         fractions = f.Get("w")
