@@ -85,7 +85,8 @@ def main(args):
 
         if not process == "jetFakes":  # ff uncertainties apply only on jetFakes process
             continue
-
+        if "frac_w" in name or "_mc" in name: # true systematic uncertainties are not altered
+            continue
         shift = split[7]
         if shift[-4:] == "Down":
             shift_type = "down"
@@ -97,8 +98,12 @@ def main(args):
                             name)
             raise Exception
 
-        # Renormalize if systematic has sub-string _ff_
+        if "frac_w" in name or "_mc" in name: # true systematic uncertainties are not altered
+            continue
+
+        # Renormalize if systematic has sub-string _ff_	
         if "_ff_" in name:
+            print name
             h_shift_raw = file_.Get(name)
             h_shift_down_raw = file_.Get(name.replace("Up", "Down"))
             if h_shift_raw == None or h_shift_down_raw == None:
@@ -106,7 +111,7 @@ def main(args):
                                 name)
                 raise Exception
 
-            h_shift, h_shift_down = interpolateHistos_ggh(h_shift_raw, h_shift_down_raw) if "ggh_unrolled" in name else interpolateHistos_qqh(h_shift_raw, h_shift_down_raw) if "qqh_unrolled" in name else interpolateHistos(h_shift_raw, h_shift_down_raw)
+            h_shift, h_shift_down = h_shift_raw, h_shift_down_raw
 
             nominal = "#" + "#".join(split[:-1]) + "#"
             h_nominal = file_.Get(nominal)
