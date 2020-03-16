@@ -28,47 +28,6 @@ def setup_logging(output_file, level=logging.DEBUG):
     logger.addHandler(file_handler)
 
 
-def interpolateHistos(h1_old, h2_old):
-
-        h1,h2 = copy.deepcopy(h1_old),copy.deepcopy(h2_old)
-
-        nbins=h1_old.GetNbinsX()
-        for ibin in xrange(nbins):
-            cont1,cont2=h1_old.GetBinContent(ibin+1),h2_old.GetBinContent(ibin+1)
-            h1.SetBinContent( ibin+1, cont2* float(nbins-ibin-1)/(nbins-1) + cont1* float(ibin)/(nbins-1) )
-            h2.SetBinContent( ibin+1, cont1* float(nbins-ibin-1)/(nbins-1) + cont2* float(ibin)/(nbins-1) )
-
-        return h1,h2
-
-
-def interpolateHistos_ggh(h1_old, h2_old):
-
-        h1,h2 = copy.deepcopy(h1_old),copy.deepcopy(h2_old)
-
-        nbins=h1_old.GetNbinsX() / 9
-        for isec in xrange(9):
-            for ibin in xrange(nbins):
-                cont1,cont2=h1_old.GetBinContent(isec*nbins+ibin+1),h2_old.GetBinContent(isec*nbins+ibin+1)
-                h1.SetBinContent( isec*nbins+ibin+1, cont2* float(nbins-ibin-1)/(nbins-1) + cont1* float(ibin)/(nbins-1) )
-                h2.SetBinContent( isec*nbins+ibin+1, cont1* float(nbins-ibin-1)/(nbins-1) + cont2* float(ibin)/(nbins-1) )
-
-        return h1,h2
-
-
-def interpolateHistos_qqh(h1_old, h2_old):
-
-        h1,h2 = copy.deepcopy(h1_old),copy.deepcopy(h2_old)
-
-        nbins=h1_old.GetNbinsX() / 5
-        for isec in xrange(5):
-            for ibin in xrange(nbins):
-                cont1,cont2=h1_old.GetBinContent(isec*nbins+ibin+1),h2_old.GetBinContent(isec*nbins+ibin+1)
-                h1.SetBinContent( isec*nbins+ibin+1, cont2* float(nbins-ibin-1)/(nbins-1) + cont1* float(ibin)/(nbins-1) )
-                h2.SetBinContent( isec*nbins+ibin+1, cont1* float(nbins-ibin-1)/(nbins-1) + cont2* float(ibin)/(nbins-1) )
-
-        return h1,h2
-
-
 def main(args):
     file_ = ROOT.TFile(args.input, "UPDATE")
     for key in [k for k in file_.GetListOfKeys() if not "output_tree" == k.GetName()]:
@@ -84,9 +43,11 @@ def main(args):
         process = split[2]
 
         if not process == "jetFakes":  # ff uncertainties apply only on jetFakes process
+            continueA
+
+        if "frac_w" in name or "_mc" in name or "tt_sf" in name: # true systematic uncertainties are not altered
             continue
-        if "frac_w" in name or "_mc" in name: # true systematic uncertainties are not altered
-            continue
+
         shift = split[7]
         if shift[-4:] == "Down":
             shift_type = "down"
@@ -100,14 +61,12 @@ def main(args):
 
         # Renormalize if systematic has sub-string _ff_	
         if "_ff_" in name:
-            h_shift_raw = file_.Get(name)
-            h_shift_down_raw = file_.Get(name.replace("Up", "Down"))
+            h_shift = file_.Get(name)
+            h_shift_down = file_.Get(name.replace("Up", "Down"))
             if h_shift_raw == None or h_shift_down_raw == None:
                 logger.critical("Failed to get shape syst. histogram %s.",
                                 name)
                 raise Exception
-
-            h_shift, h_shift_down = h_shift_raw, h_shift_down_raw
 
             nominal = "#" + "#".join(split[:-1]) + "#"
             h_nominal = file_.Get(nominal)
