@@ -63,7 +63,7 @@ def main(args):
         if "_ff_" in name:
             h_shift = file_.Get(name)
             h_shift_down = file_.Get(name.replace("Up", "Down"))
-            if h_shift_raw == None or h_shift_down_raw == None:
+            if h_shift == None or h_shift_down == None:
                 logger.critical("Failed to get shape syst. histogram %s.",
                                 name)
                 raise Exception
