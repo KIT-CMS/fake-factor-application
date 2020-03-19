@@ -45,7 +45,7 @@ def main(args):
         if not process == "jetFakes":  # ff uncertainties apply only on jetFakes process
             continue
 
-        if "frac_w" in name or "_mc" in name or "tt_sf" in name: # true systematic uncertainties are not altered
+        if "frac_w" in name or "_mc" in name or "tt_sf" in name or "_corr_" in name: # true systematic uncertainties are not altered
             continue
 
         shift = split[7]
