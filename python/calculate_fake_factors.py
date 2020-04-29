@@ -139,8 +139,8 @@ def apply_fake_factors(
     # documented in https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes
     unc_shifts = {
         "et": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
-            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat",
+            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
+            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat", "ff_w_dm0_njet2_stat",
             "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf", "ff_corr_tt_syst",
             "ff_frac_w",
             "ff_w_lepPt",
@@ -150,16 +150,18 @@ def apply_fake_factors(
             "ff_corr_w_mt",
             "ff_qcd_mvis",
             "ff_qcd_muiso",
+            "ff_corr_qcd_mvis_osss",
+            "ff_qcd_mvis_osss",
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_muiso",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
-            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat",
-            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat", 
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
+            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat", "ff_w_dm0_njet2_morphed_stat",
+            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat",
         ],
         "mt": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
-            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat",
+            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
+            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat", "ff_w_dm0_njet2_stat",
             "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf", "ff_corr_tt_syst",
             "ff_frac_w",
             "ff_w_lepPt",
@@ -169,22 +171,26 @@ def apply_fake_factors(
             "ff_corr_w_mt",
             "ff_qcd_mvis",
             "ff_qcd_muiso",
+            "ff_corr_qcd_mvis_osss",
+            "ff_qcd_mvis_osss",
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_muiso",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
-            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat",
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
+            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat", "ff_w_dm0_njet2_morphed_stat",
             "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat", 
         ],
         "tt": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat",
+            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
             "ff_w_syst", "ff_tt_syst", "ff_w_frac_syst", "ff_tt_frac_syst",
             "ff_qcd_mvis",
+            "ff_corr_qcd_mvis_osss",
+            "ff_qcd_mvis_osss",
             "ff_qcd_tau2_pt",
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_tau2_pt",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat",
+            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
         ]
     }
 
@@ -237,6 +243,7 @@ def apply_fake_factors(
 
             # Load fake factors histograms
             ff_file = ROOT.TFile.Open(fakefactordirectories[channel])
+            print fakefactordirectories[channel]
             ff = ff_file.Get('ff_comb')
 
             # Prepare output
@@ -258,6 +265,25 @@ def apply_fake_factors(
             for x in suffix[channel]:
                 output_buffer["nom_%i" % x] = numpy.zeros(1, dtype=float)
                 output_tree.Branch("ff%i_nom" % x, output_buffer["nom_%i" % x], "ff%i_nom/D" % x)
+                output_buffer["onlyqcd_%i" % x] = numpy.zeros(1, dtype=float)
+                if channel in ["mt","et"]:
+                    output_buffer["onlyw_%i" % x] = numpy.zeros(1, dtype=float)
+                    output_buffer["onlytt_%i" % x] = numpy.zeros(1, dtype=float)
+                output_buffer["fracw_%i" % x] = numpy.zeros(1, dtype=float)
+                output_buffer["fracqcd_%i" % x] = numpy.zeros(1, dtype=float)
+                output_buffer["fractt_%i" % x] = numpy.zeros(1, dtype=float)
+
+                output_tree.Branch("ff%i_nom" % x, output_buffer["nom_%i" % x], "ff%i_nom/D" % x)
+                output_tree.Branch("ff%i_onlyqcd" % x, output_buffer["onlyqcd_%i" % x], "ff%i_onlyqcd/D" % x)
+                if channel in ["mt","et"]:
+                    output_tree.Branch("ff%i_onlyw" % x, output_buffer["onlyw_%i" % x], "ff%i_onlyw/D" % x)
+                    output_tree.Branch("ff%i_onlytt" % x, output_buffer["onlytt_%i" % x], "ff%i_onlytt/D" % x)
+
+                output_tree.Branch("ff%i_fracw" % x, output_buffer["fracw_%i" % x], "ff%i_fracw/D" % x)
+                output_tree.Branch("ff%i_fracqcd" % x, output_buffer["fracqcd_%i" % x], "ff%i_fracqcd/D" % x)
+                output_tree.Branch("ff%i_fractt" % x, output_buffer["fractt_%i" % x], "ff%i_fractt/D" % x)
+
+
                 for syst in unc_shifts[channel]:
                     for shift in ["up", "down"]:
                         output_buffer["%s_%s_%i" % (syst, shift, x)] = numpy.zeros(1, dtype=float)
@@ -300,8 +326,12 @@ def apply_fake_factors(
                             varvalue = 300.0 * min(event.njets, 2.0) + min(290.0, event.m_vis)
                         elif expression == "njets2bins_mt_1_puppi":
                             varvalue = 180.0 * min(event.njets, 1.0) + min(160.0, event.mt_1_puppi)
+                        elif expression == "njets3bins_mt_1_puppi":
+                            varvalue = 180.0 * min(event.njets, 2.0) + min(160.0, event.mt_1_puppi)
                         elif expression == "njets2bins_m_vis":
                             varvalue = 250.0 * min(event.njets, 1.0) + min(240.0, event.m_vis)
+                        elif expression == "njets3bins_m_vis":
+                            varvalue = 250.0 * min(event.njets, 2.0) + min(240.0, event.m_vis)
                         elif expression in config['fraction_binning'].keys():
                             varvalue = eval(config['fraction_binning'][expression][channel]['expression'], {'min': min, 'max': max, 'm_vis': event.m_vis, 'njets': event.njets, 'mt_1_puppi': event.mt_1_puppi})
                         else:
@@ -310,6 +340,7 @@ def apply_fake_factors(
                         bin_index = cat_fractions["data"].GetXaxis().FindBin(varvalue)
                         qcd_fraction = cat_fractions["QCD"].GetBinContent(bin_index)
                         w_fraction = cat_fractions["W"].GetBinContent(bin_index)
+
                         if channel in ["mt","et"]:
                             w_fraction_error = sqrt(power(cat_fractions["W"].GetBinError(bin_index)/cat_fractions["W"].GetBinContent(bin_index),2)+power(0.05,2))
                         tt_fraction = cat_fractions["TT"].GetBinContent(bin_index)
@@ -360,6 +391,14 @@ def apply_fake_factors(
                             ]
 
                     output_buffer["nom_%i" % x][0] = ff.value(len(inputs), array('d', inputs))
+                    output_buffer["onlyqcd_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlyqcd")
+                    if channel in ["mt","et"]:
+                        output_buffer["onlyw_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlyw")
+                        output_buffer["onlytt_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlytt")
+                    output_buffer["fracw_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fracw")
+                    output_buffer["fracqcd_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fracqcd")
+                    output_buffer["fractt_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fractt")
+
                     if not (output_buffer["nom_%i" % x][0] >= 0.0 and output_buffer["nom_%i" % x][0] <= 999.0):
                         logger.info("Got invalid nominal weight %s for inputs [%s]" % (str(output_buffer["nom_%i" % x][0]), ', '.join(str(e) for e in inputs)))
                         output_buffer["nom_%i" % x][0] = 0.0
