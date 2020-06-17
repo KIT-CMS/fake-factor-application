@@ -43,6 +43,41 @@ def main(args):
         process = split[2]
 
         if not process == "jetFakes":  # ff uncertainties apply only on jetFakes process
+            if "NMSSM" in process:
+                if "MG_scale_choice" in name:
+                    h_shift = file_.Get(name)
+                    h_shift_down = file_.Get(name.replace("Up", "Down"))
+                    if h_shift == None or h_shift_down == None:
+                        logger.critical("Failed to get shape syst. histogram %s.",
+                                        name)
+                        raise Exception
+
+                    nominal = "#" + "#".join(split[:-1]) + "#"
+                    h_nominal = file_.Get(nominal)
+                    if h_nominal == None:
+                        logger.critical("Failed to get nominal histogram %s.", nominal)
+                        raise Exception
+
+                    norm_shift = h_shift.Integral()
+                    norm_shift_down = h_shift_down.Integral()
+                    norm_nominal = h_nominal.Integral()
+                    if norm_shift == 0 or norm_shift_down == 0:
+                        logger.warning("Found shift with integral of zero for systematic %s. Continue.",
+                                name)
+                        continue
+                    scale = norm_nominal / norm_shift
+                    scale_down = norm_nominal / norm_shift_down
+                    logger.debug(
+                        "Renormalize systematic %s (%f) with integral of %s (%f): %f",
+                        name, norm_shift, nominal, norm_nominal, scale)
+                    h_shift.Scale(scale)
+                    h_shift.Write()
+                    logger.debug(
+                        "Renormalize systematic %s (%f) with integral of %s (%f): %f",
+                        name.replace("Up", "Down"), norm_shift, nominal, norm_nominal, scale)
+                    h_shift_down.Scale(scale_down)
+                    h_shift_down.Write()                
+            
             continue
 
         if "frac_w" in name or "_mc" in name or "tt_sf" in name or "_corr_" in name: # true systematic uncertainties are not altered
