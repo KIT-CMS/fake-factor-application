@@ -139,8 +139,9 @@ def apply_fake_factors(
     # documented in https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsToTauTauJet2TauFakes
     unc_shifts = {
         "et": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
-            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat", "ff_w_dm0_njet2_stat",
+            "ff_qcd_syst", "ff_qcd_dr0_njet0_stat", "ff_qcd_dr0_njet1_stat", "ff_qcd_dr0_njet2_stat",
+            "ff_w_syst", "ff_w_dr0_njet0_stat", "ff_w_dr0_njet1_stat", "ff_w_dr0_njet2_stat",
+            "ff_w_dr1_njet0_stat", "ff_w_dr1_njet1_stat", "ff_w_dr1_njet2_stat",
             "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf", "ff_corr_tt_syst",
             "ff_frac_w",
             "ff_w_lepPt",
@@ -155,13 +156,15 @@ def apply_fake_factors(
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_muiso",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
-            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat", "ff_w_dm0_njet2_morphed_stat",
-            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat",
+            "ff_qcd_dr0_njet0_morphed_stat", "ff_qcd_dr0_njet1_morphed_stat", "ff_qcd_dr0_njet2_morphed_stat",
+            "ff_w_dr0_njet0_morphed_stat", "ff_w_dr0_njet1_morphed_stat", "ff_w_dr0_njet2_morphed_stat",
+            "ff_w_dr1_njet0_morphed_stat", "ff_w_dr1_njet1_morphed_stat", "ff_w_dr1_njet2_morphed_stat",
+            "ff_tt_dr0_njet0_morphed_stat", "ff_tt_dr0_njet1_morphed_stat",
         ],
         "mt": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
-            "ff_w_syst", "ff_w_dm0_njet0_stat", "ff_w_dm0_njet1_stat", "ff_w_dm0_njet2_stat",
+            "ff_qcd_syst", "ff_qcd_dr0_njet0_stat", "ff_qcd_dr0_njet1_stat", "ff_qcd_dr0_njet2_stat",
+            "ff_w_syst", "ff_w_dr0_njet0_stat", "ff_w_dr0_njet1_stat", "ff_w_dr0_njet2_stat",
+            "ff_w_dr1_njet0_stat", "ff_w_dr1_njet1_stat", "ff_w_dr1_njet2_stat",
             "ff_tt_syst", "ff_tt_stat", "ff_tt_morphed", "ff_tt_sf", "ff_corr_tt_syst",
             "ff_frac_w",
             "ff_w_lepPt",
@@ -176,12 +179,13 @@ def apply_fake_factors(
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_muiso",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
-            "ff_w_dm0_njet0_morphed_stat", "ff_w_dm0_njet1_morphed_stat", "ff_w_dm0_njet2_morphed_stat",
-            "ff_tt_dm0_njet0_morphed_stat", "ff_tt_dm0_njet1_morphed_stat", 
+            "ff_qcd_dr0_njet0_morphed_stat", "ff_qcd_dr0_njet1_morphed_stat", "ff_qcd_dr0_njet2_morphed_stat",
+            "ff_w_dr0_njet0_morphed_stat", "ff_w_dr0_njet1_morphed_stat", "ff_w_dr0_njet2_morphed_stat",
+            "ff_w_dr1_njet0_morphed_stat", "ff_w_dr1_njet1_morphed_stat", "ff_w_dr1_njet2_morphed_stat",
+            "ff_tt_dr0_njet0_morphed_stat", "ff_tt_dr0_njet1_morphed_stat", 
         ],
         "tt": [
-            "ff_qcd_syst", "ff_qcd_dm0_njet0_stat", "ff_qcd_dm0_njet1_stat", "ff_qcd_dm0_njet2_stat",
+            "ff_qcd_syst", "ff_qcd_dr0_njet0_stat", "ff_qcd_dr0_njet1_stat", "ff_qcd_dr0_njet2_stat",
             "ff_w_syst", "ff_tt_syst", "ff_w_frac_syst", "ff_tt_frac_syst",
             "ff_qcd_mvis",
             "ff_corr_qcd_mvis_osss",
@@ -190,7 +194,7 @@ def apply_fake_factors(
             "ff_corr_qcd_mvis",
             "ff_corr_qcd_tau2_pt",
             "ff_qcd_mc",
-            "ff_qcd_dm0_njet0_morphed_stat", "ff_qcd_dm0_njet1_morphed_stat", "ff_qcd_dm0_njet2_morphed_stat",
+            "ff_qcd_dr0_njet0_morphed_stat", "ff_qcd_dr0_njet1_morphed_stat", "ff_qcd_dr0_njet2_morphed_stat",
         ]
     }
 
@@ -230,7 +234,7 @@ def apply_fake_factors(
                 input_tree.AddFriend(input_friend)
 
             # Check availability of required input variables
-            varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi"]
+            varlist = ["pt_1", "pt_2", "DiTauDeltaR", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi"]
             if category_mode != "inclusive":
                 varlist.append("%s_max_index" % channel)
             if expression not in config['fraction_binning'].keys():
@@ -373,7 +377,7 @@ def apply_fake_factors(
                         ]
                     else:
                         inputs = [
-                            event.pt_2, event.decayMode_2, event.njets, event.m_vis, event.pt_1,
+                            event.pt_2, event.DiTauDeltaR, event.njets, event.m_vis, event.pt_1,
                             event.mt_1, event.iso_1,
                             qcd_fraction,
                             w_fraction,
