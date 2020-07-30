@@ -34,21 +34,24 @@ def main(args):
         # Parse name
         name = key.GetName()
 
-        if name[-1] == "#":  # shape is nominal shape
+        split = name.split("#")
+
+        if split[2] == "Nominal":  # shape is nominal shape
             continue
+        sel_split = split[1].split("-")
+        channel = sel_split[0]
+        # Process not fully correct for processes with sub-processes. Since we only check
+        # for jetFakes processes, this poses no problems.
+        process = sel_split[1]
+        category = sel_split[-1]
 
-        split = [x for x in name.split("#") if not x == ""]
-        channel = split[0]
-        category = split[1]
-        process = split[2]
-
-        if not process == "jetFakes":  # ff uncertainties apply only on jetFakes process
+        if not process in ["jetFakes", "jetFakesMC"]:  # ff uncertainties apply only on jetFakes process
             continue
 
         if "frac_w" in name or "_mc" in name or "tt_sf" in name or "_corr_" in name: # true systematic uncertainties are not altered
             continue
 
-        shift = split[7]
+        shift = split[2]
         if shift[-4:] == "Down":
             shift_type = "down"
             continue #run down together with up
@@ -68,7 +71,7 @@ def main(args):
                                 name)
                 raise Exception
 
-            nominal = "#" + "#".join(split[:-1]) + "#"
+            nominal = name.replace(split[2], "Nominal")
             h_nominal = file_.Get(nominal)
             if h_nominal == None:
                 logger.critical("Failed to get nominal histogram %s.", nominal)
