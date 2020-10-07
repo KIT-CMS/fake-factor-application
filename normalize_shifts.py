@@ -38,14 +38,8 @@ def main(args):
 
         if split[2] == "Nominal":  # shape is nominal shape
             continue
-        sel_split = split[1].split("-")
-        channel = sel_split[0]
-        # Process not fully correct for processes with sub-processes. Since we only check
-        # for jetFakes processes, this poses no problems.
-        process = sel_split[1]
-        category = sel_split[-1]
 
-        if not process in ["jetFakes", "jetFakesMC"]:  # ff uncertainties apply only on jetFakes process
+        if not split[0] in ["jetFakes", "jetFakesMC"]:  # ff uncertainties apply only on jetFakes process
             continue
 
         if "frac_w" in name or "_mc" in name or "tt_sf" in name or "_corr_" in name: # true systematic uncertainties are not altered
