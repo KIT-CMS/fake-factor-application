@@ -230,7 +230,7 @@ def apply_fake_factors(
                 input_tree.AddFriend(input_friend)
 
             # Check availability of required input variables
-            varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi"]
+            varlist = ["pt_1", "pt_2", "decayMode_1", "decayMode_2", "m_vis", "njets", "iso_1", "mt_1", "mt_1_puppi","jpt_1"]
             if category_mode != "inclusive":
                 varlist.append("%s_max_index" % channel)
             if expression not in config['fraction_binning'].keys():
@@ -332,6 +332,10 @@ def apply_fake_factors(
                             varvalue = 250.0 * min(event.njets, 1.0) + min(240.0, event.m_vis)
                         elif expression == "njets3bins_m_vis":
                             varvalue = 250.0 * min(event.njets, 2.0) + min(240.0, event.m_vis)
+                        elif expression == "nbtag3bins_mt_1_puppi":
+                            varvalue = 180.0 * min(event.nbtag, 2.0) + min(160.0, event.mt_1_puppi)
+                        elif expression == "nbtag3bins_m_vis":
+                            varvalue = 250.0 * min(event.nbtag, 2.0) + min(240.0, event.m_vis)
                         elif expression in config['fraction_binning'].keys():
                             varvalue = eval(config['fraction_binning'][expression][channel]['expression'], {'min': min, 'max': max, 'm_vis': event.m_vis, 'njets': event.njets, 'mt_1_puppi': event.mt_1_puppi})
                         else:
@@ -367,7 +371,7 @@ def apply_fake_factors(
                             getattr(event, "pt_%i" % x),
                             getattr(event, "pt_%i" % (3 - x)),
                             getattr(event, "decayMode_%i" % x), event.njets,
-                            event.m_vis, qcd_fraction,
+                            event.m_vis, event.jpt_1, qcd_fraction,
                             w_fraction,
                             tt_fraction
                         ]
