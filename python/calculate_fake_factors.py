@@ -258,8 +258,9 @@ def apply_fake_factors(
                 if len(quant.split("__")) > 1:
                    vardict[variable].add(quant.split("__")[1])
     required_piplines = list(set([x for var in vardict.keys() for x in vardict[var]])) + ["nominal"]
+    # remove pipelines with jes in name from the list of required pipelines
+    required_piplines = [x for x in required_piplines if "jes" not in x and "jer" not in x and "met" not in x]
     print(required_piplines)
-
     output_buffer = {}
     varlist_dict = {}
 
@@ -370,7 +371,17 @@ def apply_fake_factors(
                         )
 
     # Fill tree
+    print("eventrange", eventrange)
     for evt_i, event in enumerate(input_tree):
+        if eventrange is not None:
+            if evt_i < eventrange[0]:
+                continue
+            elif evt_i > eventrange[1] and eventrange[1] >= 0:  # latter condition allows to set negative upper limit in order to have it ignored
+                print("Done with event range {}".format(eventrange))
+                break
+        eventcounter = evt_i - eventrange[0] if eventrange is not None else evt_i
+        if(eventcounter % 1000 == 0):
+            print("Processing event {} / {} ({} %)".format(eventcounter, eventrange[1] - eventrange[0], 100 * eventcounter / (1 + eventrange[1] - eventrange[0])))
         for pipeline in required_piplines:
             varlist = varlist_dict[pipeline]
             variableobjects = {}
@@ -381,14 +392,11 @@ def apply_fake_factors(
             # print('Using defaults: %s' % default_variables)
             # print("Variableobjects: {}".format(variableobjects))
             # for shifts, append the shift name to the suffix
+
             shift_suffix = ""
             if pipeline != "nominal":
                 shift_suffix = "__%s" % pipeline
-            if eventrange is not None:
-                if evt_i < eventrange[0]:
-                    continue
-                elif evt_i > eventrange[1] and eventrange[1] >= 0:  # latter condition allows to set negative upper limit in order to have it ignored
-                    break
+
             for suffix in suffix_dict[channel]:
                 inputs = []
                 if category_mode == "inclusive":
