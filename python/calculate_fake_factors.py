@@ -200,22 +200,7 @@ def apply_fake_factors(
 
     # Determine channel
     channels = ["et", "mt", "tt"]
-    pipelines = ["nominal"]
-    filename = os.path.basename(datafile)
 
-    if "SingleElectron" in filename or "_ElTau" in filename:
-        channels = ["et"]
-    elif "SingleMuon" in filename or "_MuTau" in filename:
-        channels = ["mt"]
-    elif ("Tau" in filename and "Run%s" % era in filename) or "_TauTau" in filename:
-        channels = ["tt"]
-    else:
-        channels = ["et", "mt", "tt"]
-    if "Run%s" % era not in filename:
-        pipelines = ["nominal", "tauEsOneProngUp", "tauEsOneProngDown",
-                     "tauEsOneProngOnePiZeroUp", "tauEsOneProngOnePiZeroDown",
-                     "tauEsThreeProngUp", "tauEsThreeProngDown",
-                     "tauEsThreeProngOnePiZeroUp", "tauEsThreeProngOnePiZeroDown"]
     selected_channels = [channel for channel in fractions.keys() if channel in channels]
     if len(selected_channels) > 1:
         raise Exception("More than one channel configured, which is not forseen !")
@@ -380,8 +365,8 @@ def apply_fake_factors(
                 print("Done with event range {}".format(eventrange))
                 break
         eventcounter = evt_i - eventrange[0] if eventrange is not None else evt_i
-        if(eventcounter % 1000 == 0):
-            print("Processing event {} / {} ({} %)".format(eventcounter, eventrange[1] - eventrange[0], 100 * eventcounter / (1 + eventrange[1] - eventrange[0])))
+        if(eventcounter % 100 == 0):
+            print("Processing event {} / {} ({} %)".format(1 + eventcounter, 1 + eventrange[1] - eventrange[0], 100 * eventcounter / (1 + eventrange[1] - eventrange[0])))
         for pipeline in required_piplines:
             varlist = varlist_dict[pipeline]
             variableobjects = {}
