@@ -245,7 +245,7 @@ def apply_fake_factors(
     required_piplines = list(set([x for var in vardict.keys() for x in vardict[var]])) + ["nominal"]
     # remove pipelines with jes in name from the list of required pipelines
     required_piplines = [x for x in required_piplines if "jes" not in x and "jer" not in x and "met" not in x]
-    print(required_piplines)
+    print("Running pipelines: {}".format(required_piplines))
     output_buffer = {}
     varlist_dict = {}
 
@@ -253,18 +253,6 @@ def apply_fake_factors(
     print("Channel: {}".format(channel))
     for pipeline in required_piplines:
 
-        # if pipeline_selection and pipeline_selection != pipeline:
-        #     print('skip: %s because %s != %s' % (pipeline, pipeline_selection, pipeline))
-        #     continue
-
-        # Prepare data inputs
-
-        # friendfiles = []
-        # for input_friend_file in friendfilelists[channel]:
-        #     friendfiles.append(ROOT.TFile(input_friend_file, "READ"))
-        #     input_friend = friendfiles[-1].Get("%s_%s/%s" % (channel, pipeline, treename))
-        #     input_tree.AddFriend(input_friend)
-        # now build the variablelist
         # if it is nominal, just use the default variable, if it is a shift, try to find, if the shifted variable exists, use it, otherwise use the default
         if pipeline == "nominal":
             varlist_dict["nominal"] = []
@@ -288,13 +276,6 @@ def apply_fake_factors(
         if expression not in config['fraction_binning'].keys():
             varlist_dict[pipeline].append(expression)
 
-        # for variable in varlist_dict:
-        #     if not input_tree.GetBranchStatus(variable):
-        #         logger.critical("Tree does not contain input variable '%s'" % variable)
-        #         raise Exception
-
-
-
         # one fake factor per tau is needed
         suffix_dict = {
             "et": [2],
@@ -306,25 +287,6 @@ def apply_fake_factors(
         if pipeline != "nominal":
             shift_suffix = "__%s" % pipeline
         for suffix in suffix_dict[channel]:
-            # output_buffer["nom_%i" % x] = numpy.zeros(1, dtype=float)
-            # output_tree.Branch("ff%i_nom" % x, output_buffer["nom_%i" % x], "ff%i_nom/D" % x)
-            # output_buffer["onlyqcd_%i" % x] = numpy.zeros(1, dtype=float)
-            # if channel in ["mt","et"]:
-            #     output_buffer["onlyw_%i" % x] = numpy.zeros(1, dtype=float)
-            #     output_buffer["onlytt_%i" % x] = numpy.zeros(1, dtype=float)
-            # output_buffer["fracw_%i" % x] = numpy.zeros(1, dtype=float)
-            # output_buffer["fracqcd_%i" % x] = numpy.zeros(1, dtype=float)
-            # output_buffer["fractt_%i" % x] = numpy.zeros(1, dtype=float)
-
-            # output_tree.Branch("ff%i_nom" % x, output_buffer["nom_%i" % x], "ff%i_nom/D" % x)
-            # output_tree.Branch("ff%i_onlyqcd" % x, output_buffer["onlyqcd_%i" % x], "ff%i_onlyqcd/D" % x)
-            # if channel in ["mt","et"]:
-            #     output_tree.Branch("ff%i_onlyw" % x, output_buffer["onlyw_%i" % x], "ff%i_onlyw/D" % x)
-            #     output_tree.Branch("ff%i_onlytt" % x, output_buffer["onlytt_%i" % x], "ff%i_onlytt/D" % x)
-
-            # output_tree.Branch("ff%i_fracw" % x, output_buffer["fracw_%i" % x], "ff%i_fracw/D" % x)
-            # output_tree.Branch("ff%i_fracqcd" % x, output_buffer["fracqcd_%i" % x], "ff%i_fracqcd/D" % x)
-            # output_tree.Branch("ff%i_fractt" % x, output_buffer["fractt_%i" % x], "ff%i_fractt/D" % x)
 
             output_buffer["nom_{}{}".format(suffix, shift_suffix)] = numpy.zeros(1, dtype=float)
             output_buffer["onlyqcd_{}{}".format(suffix, shift_suffix)] = numpy.zeros(1, dtype=float)
@@ -354,7 +316,9 @@ def apply_fake_factors(
                             output_buffer["%s_%s_%i" % (syst, shift, suffix)],
                             "ff%i_%s_%s/D" % (suffix, syst, shift)
                         )
-
+    # for _pipeline in required_piplines:
+    #     print("Pipeline: {}".format(_pipeline))
+    #     print("Variables: {}".format(varlist_dict[_pipeline]))
     # Fill tree
     print("eventrange", eventrange)
     for evt_i, event in enumerate(input_tree):
@@ -473,15 +437,6 @@ def apply_fake_factors(
                             w_fraction,
                             tt_fraction
                         ]
-
-                # output_buffer["nom_%i" % x][0] = ff.value(len(inputs), array('d', inputs))
-                # output_buffer["onlyqcd_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlyqcd")
-                # if channel in ["mt","et"]:
-                #     output_buffer["onlyw_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlyw")
-                #     output_buffer["onlytt_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_onlytt")
-                # output_buffer["fracw_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fracw")
-                # output_buffer["fracqcd_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fracqcd")
-                # output_buffer["fractt_%i" % x][0] = ff.value(len(inputs), array('d', inputs), "ff_fractt")
 
                 output_buffer["nom_{}{}".format(suffix, shift_suffix)][0] = ff.value(len(inputs), array('d', inputs))
                 output_buffer["onlyqcd_{}{}".format(suffix, shift_suffix)][0] = ff.value(len(inputs), array('d', inputs), "ff_onlyqcd")
